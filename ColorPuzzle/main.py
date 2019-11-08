@@ -1,4 +1,4 @@
-#Definir vencedor
+#Definir vencedor |  OK
 #Gerar matriz de cores a cada jogada
 #Importar em csv a matriz de cores por jogada do jogador (pode ser em formato de numeros ja) + coordenada x da jogada
 #Treinar a rede SOM
@@ -7,10 +7,14 @@
 #arq.close()
 
 import pygame
-from pygame.locals import MOUSEBUTTONDOWN, Rect, QUIT
+from pygame.locals import Rect, QUIT
 from sys import exit
 import numpy as np
-
+import csv
+'''
+arq = open('partida.csv', 'wb')
+writer = csv.writer(arq, delimiter=',', quotechar='|', quoting=csv.)
+'''
 pygame.init()
 tela = pygame.display.set_mode((720, 480), 0, 32)
 circulo = np.empty( (4,7), dtype=object)
@@ -42,13 +46,19 @@ class jogador:
 def winner():
     global circulo
     white = (255, 255, 255)
-    for i in range (0,3):
-        for j in range(0, 7-2):
-            if(circulo[i,j].cor == circulo[i,j+1].cor and circulo[i,j].cor == circulo[i,j+2].cor):
+    cont = 0
+    #Horizontal acho que ok
+    for i in range (0,4):
+        for j in range(0, 5):
+            cont = cont +1
+            if((circulo[i,j].cor == circulo[i,j+1].cor) and (circulo[i,j].cor == circulo[i,j+2].cor) and (circulo[i,j].cor != white)):
                 return circulo[i,j].cor
+            
+    #Vertical ok
     for j in range (0,7):
-        for i in range(0, 3-2):
-            if(circulo[i,j].cor == circulo[i+1,j].cor and circulo[i,j].cor == circulo[i+2,j].cor):
+        for i in range(0, 2):
+            if((circulo[i,j].cor == circulo[i+1,j].cor) and (circulo[i,j].cor == circulo[i+2,j].cor) and (circulo[i,j].cor != white)):
+                #print("oi")
                 return circulo[i,j].cor
     return white
 def desenhar_tabu():
@@ -71,6 +81,16 @@ def pintar_peca(player, linha, coluna):
     
 def testa_branco(col, jogador):
     global circulo
+    '''
+    for i in range (0, 4):
+        for j in range(0,7):
+            if(circulo[i, j].cor == (255,255,255)):
+                writer.writerow("0, ")
+            elif (circulo[i, j].cor == (0, 255, 255)):
+                writer.writerow("1, ")
+            else:
+                writer.writerow("2, ")
+    '''
     white = (255, 255, 255)
     for i in range (3, -1, -1):
         if circulo[i, col].cor == white:
@@ -83,7 +103,7 @@ def find_column (coordx):
     global circulo
     for col in range(0, 7):
         if(circulo[1, col].x == coordx):
-            print(col)
+            #print(col)
             return col
         
     
@@ -100,7 +120,18 @@ desenhar_tabu()
 while True: #while da partida
     pessoa = jogador(True)
     computador = jogador(False)
-    print(winner())
+    cabou= winner()
+    if(cabou == (255, 255, 0)):
+       print("O amarelo venceu")
+       pygame.quit()
+       exit()       
+       
+    elif (cabou == (0,255,255)):
+        print("O ciano venceu")
+        pygame.quit()
+        exit()        
+        
+    #print(winner())
     if(turn):
         escolha = circ(48,48, pessoa.cor)
         pygame.draw.circle(tela, pessoa.cor, (48, 48), 48)
@@ -143,3 +174,4 @@ while True: #while da partida
 
     #pygame.display.flip()
     pygame.display.update()
+#arq.close()
