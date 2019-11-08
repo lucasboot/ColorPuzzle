@@ -11,10 +11,9 @@ from pygame.locals import Rect, QUIT
 from sys import exit
 import numpy as np
 import csv
-'''
-arq = open('partida.csv', 'wb')
-writer = csv.writer(arq, delimiter=',', quotechar='|', quoting=csv.)
-'''
+arq = open("partida.csv", "w")
+#writer = csv.writer(arq, delimiter=',', quotechar='|', quoting=csv.)
+
 pygame.init()
 tela = pygame.display.set_mode((720, 480), 0, 32)
 circulo = np.empty( (4,7), dtype=object)
@@ -42,6 +41,13 @@ class jogador:
             self.cor = (0, 255, 255)
         else:
             self.cor = (255, 255, 0)
+'''
+def empate():
+    global circulo
+    for i in range(0,4):
+        for j in range(0,7):
+        
+'''
             
 def winner():
     global circulo
@@ -60,6 +66,15 @@ def winner():
             if((circulo[i,j].cor == circulo[i+1,j].cor) and (circulo[i,j].cor == circulo[i+2,j].cor) and (circulo[i,j].cor != white)):
                 #print("oi")
                 return circulo[i,j].cor
+    #Diagonais
+    for i in range(0, 4): 
+        for j in range(0, 7):
+            if(j + 2 <= 6 and i+2  <= 3):
+                if((circulo[i,j].cor == circulo[i+1,j+1].cor) and (circulo[i,j].cor == circulo[i+2,j+2].cor) and (circulo[i,j].cor != white)):
+                    return circulo[i,j].cor
+            if(j+2 <= 6 and i-2 >=0):
+                if((circulo[i,j].cor == circulo[i-1,j+1].cor) and (circulo[i,j].cor == circulo[i-2,j+2].cor) and (circulo[i,j].cor != white)):
+                    return circulo[i,j].cor
     return white
 def desenhar_tabu():
     lin= 3
@@ -81,16 +96,18 @@ def pintar_peca(player, linha, coluna):
     
 def testa_branco(col, jogador):
     global circulo
-    '''
-    for i in range (0, 4):
-        for j in range(0,7):
-            if(circulo[i, j].cor == (255,255,255)):
-                writer.writerow("0, ")
-            elif (circulo[i, j].cor == (0, 255, 255)):
-                writer.writerow("1, ")
-            else:
-                writer.writerow("2, ")
-    '''
+    if(jogador.cor == (255, 255, 0)): #amarelo para ciano (0, 255, 255)
+        for i in range (0, 4):
+            for j in range(0,7):
+                if (circulo[i,j].cor == (255, 255, 255)):
+                    cor = 0
+                elif(circulo[i,j].cor == (255, 255, 0)):
+                    cor = 1
+                else:
+                    cor = 2
+                arq.write(str(cor) + ", ")
+        arq.write(str(col))
+        arq.write("\n")
     white = (255, 255, 255)
     for i in range (3, -1, -1):
         if circulo[i, col].cor == white:
@@ -123,11 +140,13 @@ while True: #while da partida
     cabou= winner()
     if(cabou == (255, 255, 0)):
        print("O amarelo venceu")
+       arq.close()
        pygame.quit()
        exit()       
        
     elif (cabou == (0,255,255)):
         print("O ciano venceu")
+        arq.close()
         pygame.quit()
         exit()        
         
@@ -174,4 +193,4 @@ while True: #while da partida
 
     #pygame.display.flip()
     pygame.display.update()
-#arq.close()
+
