@@ -11,7 +11,7 @@ from pygame.locals import Rect, QUIT
 from sys import exit
 import numpy as np
 import csv
-arq = open("partida.csv", "w")
+arq = open("partida.csv", "a")
 #writer = csv.writer(arq, delimiter=',', quotechar='|', quoting=csv.)
 
 pygame.init()
@@ -41,14 +41,20 @@ class jogador:
             self.cor = (0, 255, 255)
         else:
             self.cor = (255, 255, 0)
-'''
-def empate():
+
+def empate(): #ainda não foi adicionada ao jogo
     global circulo
+    sequence = 0
     for i in range(0,4):
         for j in range(0,7):
-        
-'''
-            
+            if(circulo[i,j].cor != (255, 255, 255)):
+                sequence = sequence + 1
+    if(sequence == 4*7):
+        return True
+    else:
+        return False
+              
+
 def winner():
     global circulo
     white = (255, 255, 255)
@@ -193,4 +199,3 @@ while True: #while da partida
 
     #pygame.display.flip()
     pygame.display.update()
-
