@@ -42,7 +42,7 @@ class jogador:
         else:
             self.cor = (255, 255, 0)
 
-def empate(): #ainda não foi adicionada ao jogo
+def empate(): #ainda nao foi adicionada ao jogo
     global circulo
     sequence = 0
     for i in range(0,4):
@@ -50,6 +50,7 @@ def empate(): #ainda não foi adicionada ao jogo
             if(circulo[i,j].cor != (255, 255, 255)):
                 sequence = sequence + 1
     if(sequence == 4*7):
+        print("Empatou")
         return True
     else:
         return False
@@ -140,7 +141,7 @@ print(pygame.font.get_fonts())
 events = pygame.event.get()
 turn = True
 desenhar_tabu()
-while True: #while da partida
+while not (empate()): 
     pessoa = jogador(True)
     computador = jogador(False)
     cabou= winner()
