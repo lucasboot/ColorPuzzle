@@ -170,7 +170,8 @@ while not (empate()):
     while True: #While da jogada de cada player
         antes=  turn
         pygame.display.update()
-        for e in pygame.event.get():
+        if(turn):
+         for e in pygame.event.get():
             if e.type == QUIT:
                 pygame.quit()
                 exit()
@@ -186,17 +187,29 @@ while not (empate()):
                         pygame.draw.circle(tela, (0, 0, 0), (escolha.x, escolha.y), 48)
                         escolha.x = escolha.x - 96
                         escolha.move(escolha.x, escolha.y, escolha.cor)
-
+    
                 elif (e.key == pygame.K_SPACE):
                    if(turn):
                        player = pessoa
                    else:
                         player = computador
-
+    
                    if(testa_branco(find_column(escolha.x), player)):
                         pygame.draw.circle(tela, (0, 0, 0), (escolha.x, escolha.y), 48)
                         turn =  not turn
-                        
+        else:
+            vet = [] #Adicionar um vetor com os pontos da vez, importar os neuronios, calcular distancia
+            for i in range (0, 4):
+                for j in range(0,7):
+                    if (circulo[i,j].cor == (255, 255, 255)):
+                        cor = 0
+                    elif(circulo[i,j].cor == (255, 255, 0)):
+                        cor = 1
+                    else:
+                        cor = 2
+                    arq.write(str(cor) + ", ")
+            arq.write(str(col))
+            arq.write("\n")            
         if (antes is not turn):
             break
 
