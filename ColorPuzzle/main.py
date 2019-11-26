@@ -11,14 +11,18 @@ from pygame.locals import Rect, QUIT
 from sys import exit
 import numpy as np
 import csv
-from scipy.spatial import distance
-
 arq = open("partida.csv", "a")
 #writer = csv.writer(arq, delimiter=',', quotechar='|', quoting=csv.)
 
 pygame.init()
 tela = pygame.display.set_mode((720, 480), 0, 32)
 circulo = np.empty( (4,7), dtype=object)
+
+frameAmarelo = np.zeros( (14,29), dtype=int) #matriz do tabuleiro e jogadas do jogador amarelo
+frameCiano = np.zeros( (14,29), dtype=int) #matriz do tabuleiro e jogadas do jogador ciano
+
+contJogadas = -1 #contador de jogadas do jogo, cada rodada tem duas jogadas
+rodadas = -1 #contador de rodadas
 
 class circ:
     def __init__(self, x, y, cor):
@@ -44,18 +48,6 @@ class jogador:
         else:
             self.cor = (255, 255, 0)
 
-def empate(): #ainda nao foi adicionada ao jogo
-    global circulo
-    sequence = 0
-    for i in range(0,4):
-        for j in range(0,7):
-            if(circulo[i,j].cor != (255, 255, 255)):
-                sequence = sequence + 1
-    if(sequence == 4*7):
-        print("Empatou")
-        return True
-    else:
-        return False
               
 
 def winner():
@@ -105,18 +97,38 @@ def pintar_peca(player, linha, coluna):
     
 def testa_branco(col, jogador):
     global circulo
-    if(jogador.cor == (255, 255, 0)): #amarelo para ciano (0, 255, 255)
+    global frameAmarelo
+    global contJogadas
+    if(jogador.cor == (0, 255, 255)): #ciano 
+        #construcao da matriz de rodadas do jogador de Ciano ----------------------------
         for i in range (0, 4):
             for j in range(0,7):
                 if (circulo[i,j].cor == (255, 255, 255)):
-                    cor = 0
+                    frameCiano[rodadas, i*7 + j] = 0
+                    
                 elif(circulo[i,j].cor == (255, 255, 0)):
-                    cor = 1
+                    frameCiano[rodadas, i*7 + j] = 1
+                    
                 else:
-                    cor = 2
-                arq.write(str(cor) + ", ")
-        arq.write(str(col))
-        arq.write("\n")
+                    frameCiano[rodadas, i*7 + j] =2
+
+        frameCiano[rodadas, 28] = col
+    
+    if(jogador.cor == (255, 255, 0)): #amarelo 
+         #construcao da matriz de rodadas do jogador de Amarelo -------------------------
+        for i in range (0, 4):
+            for j in range(0,7):
+                if (circulo[i,j].cor == (255, 255, 255)):
+                    frameAmarelo[rodadas, i*7 + j] = 0
+                    
+                elif(circulo[i,j].cor == (255, 255, 0)):
+                    frameAmarelo[rodadas, i*7 + j] = 2
+                    
+                else:
+                    frameAmarelo[rodadas, i*7 + j] = 1
+
+        frameAmarelo[rodadas, 28] = col
+
     white = (255, 255, 255)
     for i in range (3, -1, -1):
         if circulo[i, col].cor == white:
@@ -143,18 +155,43 @@ print(pygame.font.get_fonts())
 events = pygame.event.get()
 turn = True
 desenhar_tabu()
-while not (empate()): 
+while True: #while da partida
     pessoa = jogador(True)
     computador = jogador(False)
     cabou= winner()
+    contJogadas = contJogadas + 1 # a cada loop se add uma jogada. Lembrando que a variavel comeca no -1 e a primeira joda deve ser a jogada 0
+    
+    if(contJogadas%2 == 0): # a cada duas jogadas se adiciona uma rodada. A primeira rodada deve ser a 0
+        rodadas = rodadas + 1
+    #print(rodadas) #controle de rodadas
+    
+    print("----------------------------------------------\n") #guia
+    
     if(cabou == (255, 255, 0)):
        print("O amarelo venceu")
+       #print(frameAmarelo) #apagar depois - controle da matriz que sera usada para editar o csv
+       #print(rodadas) #apagar depois - controle de linhas para o csv
+       for i in range (0, rodadas):
+            for j in range(0,29):
+                if (j == 28):
+                    arq.write(str(frameAmarelo[i, j]) + "\n") #adicionando no arquivo partida a coluna da jogada do amarelo
+                else:
+                    arq.write(str(frameAmarelo[i, j]) + ", ") #adicionando no csv partida a matriz frameAmarelo, separando os itens por virgula
+               
        arq.close()
        pygame.quit()
        exit()       
        
     elif (cabou == (0,255,255)):
         print("O ciano venceu")
+        #print(frameCiano) #apagar depois - controle da matriz que sera usada para editar o csv
+        #print(rodadas + 1) #apagar depois - controle de linhas para o csv
+        for i in range (0, rodadas + 1):
+            for j in range(0,29):
+                if (j == 28):
+                    arq.write(str(frameCiano[i, j]) + "\n") #adicionando no arquivo partida a coluna da jogada do ciano
+                else:
+                    arq.write(str(frameCiano[i, j]) + ", ") #adicionando no csv partida a matriz frameCiano, separando os itens por virgula   
         arq.close()
         pygame.quit()
         exit()        
@@ -195,6 +232,12 @@ while not (empate()):
 
                    if(testa_branco(find_column(escolha.x), player)):
                         pygame.draw.circle(tela, (0, 0, 0), (escolha.x, escolha.y), 48)
+                        if (player.cor == (255 ,255 ,0)):
+                            print(frameAmarelo)
+                        elif (player.cor == (0,255,255)):
+                            print(frameCiano)
+                        #print(contJogadas)    #controle de jogadas ao final do looping
+                        #print(rodadas)
                         turn =  not turn
                         
         if (antes is not turn):
