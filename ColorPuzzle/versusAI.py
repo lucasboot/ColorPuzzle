@@ -12,13 +12,18 @@ from sys import exit
 import numpy as np
 import csv
 from scipy.spatial import distance
+import pandas as pd
+
+neuronios = pd.read_csv("https://raw.githubusercontent.com/lucasboot/ColorPuzzle/master/ColorPuzzle/neuronios.csv")
+neuro = neuronios.iloc[:, :-1].values
+classes = neuronios.iloc[:,-1]
 
 arq = open("partida.csv", "a")
 #writer = csv.writer(arq, delimiter=',', quotechar='|', quoting=csv.)
 
 pygame.init()
 tela = pygame.display.set_mode((720, 480), 0, 32)
-circulo = np.empty( (4,7), dtype=object)
+circulo = np.empty((4,7), dtype=object)
 
 class circ:
     def __init__(self, x, y, cor):
@@ -105,6 +110,8 @@ def pintar_peca(player, linha, coluna):
     
 def testa_branco(col, jogador):
     global circulo
+    white = (255, 255, 255)
+    '''
     if(jogador.cor == (255, 255, 0)): #amarelo para ciano (0, 255, 255)
         for i in range (0, 4):
             for j in range(0,7):
@@ -117,9 +124,9 @@ def testa_branco(col, jogador):
                 arq.write(str(cor) + ", ")
         arq.write(str(col))
         arq.write("\n")
-    white = (255, 255, 255)
+        '''    
     for i in range (3, -1, -1):
-        if circulo[i, col].cor == white:
+        if circulo[i, col].cor == (255, 255, 255):
             pintar_peca(jogador, i, col)
             return True
     return False
@@ -171,45 +178,63 @@ while not (empate()):
         antes=  turn
         pygame.display.update()
         if(turn):
-         for e in pygame.event.get():
-            if e.type == QUIT:
-                pygame.quit()
-                exit()
-            if e.type == pygame.KEYDOWN:
-                if e.key == pygame.K_RIGHT:
-                    if(escolha.x < 624):
-                        pygame.draw.circle(tela, (0, 0, 0), (escolha.x, escolha.y), 48)
-                        escolha.x = escolha.x + 96
-                        escolha.move(escolha.x, escolha.y, escolha.cor)                          
-     
-                elif e.key == pygame.K_LEFT:
-                    if(escolha.x >48):
-                        pygame.draw.circle(tela, (0, 0, 0), (escolha.x, escolha.y), 48)
-                        escolha.x = escolha.x - 96
-                        escolha.move(escolha.x, escolha.y, escolha.cor)
+            for e in pygame.event.get():
+                if e.type == QUIT:
+                    pygame.quit()
+                    exit()
+                if e.type == pygame.KEYDOWN:
+                    if e.key == pygame.K_RIGHT:
+                        if(escolha.x < 624):
+                            pygame.draw.circle(tela, (0, 0, 0), (escolha.x, escolha.y), 48)
+                            escolha.x = escolha.x + 96
+                            escolha.move(escolha.x, escolha.y, escolha.cor)                          
+         
+                    elif e.key == pygame.K_LEFT:
+                        if(escolha.x >48):
+                            pygame.draw.circle(tela, (0, 0, 0), (escolha.x, escolha.y), 48)
+                            escolha.x = escolha.x - 96
+                            escolha.move(escolha.x, escolha.y, escolha.cor)
     
-                elif (e.key == pygame.K_SPACE):
-                   if(turn):
-                       player = pessoa
-                   else:
-                        player = computador
-    
-                   if(testa_branco(find_column(escolha.x), player)):
-                        pygame.draw.circle(tela, (0, 0, 0), (escolha.x, escolha.y), 48)
-                        turn =  not turn
+                    elif (e.key == pygame.K_SPACE):
+                           player = pessoa
+                           if(testa_branco(find_column(escolha.x), player)):
+                               pygame.draw.circle(tela, (0, 0, 0), (escolha.x, escolha.y), 48)
+                               turn = not turn
+                               
+                           
         else:
-            vet = [] #Adicionar um vetor com os pontos da vez, importar os neuronios, calcular distancia
-            for i in range (0, 4):
-                for j in range(0,7):
-                    if (circulo[i,j].cor == (255, 255, 255)):
-                        cor = 0
-                    elif(circulo[i,j].cor == (255, 255, 0)):
-                        cor = 1
-                    else:
-                        cor = 2
-                    arq.write(str(cor) + ", ")
-            arq.write(str(col))
-            arq.write("\n")            
+             player = computador
+             jogada = np.empty((1, 28), dtype=object)
+             cont = 0
+             for i in range (0,4):
+                 for j in range (0, 7):
+                     if (circulo[i,j].cor == (255, 255, 255)):
+                         cor = 0
+                     elif(circulo[i,j].cor == (255, 255, 0)):
+                         cor = 1
+                     else:
+                         cor = 2                                
+                     jogada[0, cont] = cor
+                     cont = cont +1
+             distancias = np.empty((64,1), dtype=object)
+             for k in range (64):
+                 #distancias.append(distance.euclidean(neuro[k, :],distancias))
+                 distancias[k, 0] = distance.euclidean(neuro[k, :],jogada[0, :])
+             menor = distancias[0,0]
+             indice = k
+
+             for i in range (64):
+                 if(distancias[i,0] < menor):
+                     menor = distancias[i,0]
+                     indice = i
+             col = classes[indice]
+             print(col)
+
+             if(testa_branco(find_column(col), player)):
+                 pygame.draw.circle(tela, (0, 0, 0), (escolha.x, escolha.y), 48)
+                 turn =  not turn                                 
+    
+        
         if (antes is not turn):
             break
 
