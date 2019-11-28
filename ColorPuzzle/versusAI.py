@@ -16,9 +16,10 @@ import pandas as pd
 
 neuronios = pd.read_csv("https://raw.githubusercontent.com/lucasboot/ColorPuzzle/master/ColorPuzzle/neuronios.csv")
 neuro = neuronios.iloc[:, :-1].values
-classes = neuronios.iloc[:,-1]
-
-arq = open("partida.csv", "a")
+classes = neuronios.iloc[:,-1].values
+classes = list(classes)
+print(classes)
+#arq = open("partida.csv", "a")
 #writer = csv.writer(arq, delimiter=',', quotechar='|', quoting=csv.)
 
 pygame.init()
@@ -107,7 +108,7 @@ def desenhar_tabu():
 def pintar_peca(player, linha, coluna):
     global circulo
     circulo[linha, coluna].setColor(player.cor)
-    
+
 def testa_branco(col, jogador):
     global circulo
     white = (255, 255, 255)
@@ -124,9 +125,10 @@ def testa_branco(col, jogador):
                 arq.write(str(cor) + ", ")
         arq.write(str(col))
         arq.write("\n")
-        '''    
+        '''
+    print(type(col))
     for i in range (3, -1, -1):
-        if circulo[i, col].cor == (255, 255, 255):
+        if (circulo[i, col].cor == (255, 255, 255)):
             pintar_peca(jogador, i, col)
             return True
     return False
@@ -134,10 +136,11 @@ def testa_branco(col, jogador):
 
 def find_column (coordx):
     global circulo
-    for col in range(0, 7):
-        if(circulo[1, col].x == coordx):
+    print(type(coordx))
+    for colu in range(0, 7):
+        if(circulo[1, colu].x == coordx):
             #print(col)
-            return col
+            return colu
         
     
 pygame.display.set_caption('Color_Puzzle')
@@ -156,13 +159,11 @@ while not (empate()):
     cabou= winner()
     if(cabou == (255, 255, 0)):
        print("O amarelo venceu")
-       arq.close()
        pygame.quit()
        exit()       
        
     elif (cabou == (0,255,255)):
         print("O ciano venceu")
-        arq.close()
         pygame.quit()
         exit()        
         
@@ -227,10 +228,9 @@ while not (empate()):
                  if(distancias[i,0] < menor):
                      menor = distancias[i,0]
                      indice = i
-             col = classes[indice]
-             print(col)
-
-             if(testa_branco(find_column(col), player)):
+             col = int(classes[indice])
+             player = computador
+             if(testa_branco(col, player)):
                  pygame.draw.circle(tela, (0, 0, 0), (escolha.x, escolha.y), 48)
                  turn =  not turn                                 
     
