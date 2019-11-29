@@ -5,7 +5,7 @@
 # arq = open("nome do arquivo.csv", "w")
 #arq.write(str())
 #arq.close()
-
+from random import randrange
 import pygame
 from pygame.locals import Rect, QUIT
 from sys import exit
@@ -14,7 +14,8 @@ import csv
 from scipy.spatial import distance
 import pandas as pd
 
-neuronios = pd.read_csv("https://raw.githubusercontent.com/lucasboot/ColorPuzzle/master/ColorPuzzle/neuronios.csv")
+#neuronios = pd.read_csv("https://raw.githubusercontent.com/lucasboot/ColorPuzzle/master/ColorPuzzle/neuronios.csv")
+neuronios = pd.read_csv("teste.csv")
 neuro = neuronios.iloc[:, :-1].values
 classes = neuronios.iloc[:,-1].values
 classes = list(classes)
@@ -151,7 +152,7 @@ espaco = 0
 print(pygame.font.get_fonts())
 
 events = pygame.event.get()
-turn = True
+turn = False
 desenhar_tabu()
 while not (empate()): 
     pessoa = jogador(True)
@@ -217,14 +218,14 @@ while not (empate()):
                          cor = 2                                
                      jogada[0, cont] = cor
                      cont = cont +1
-             distancias = np.empty((64,1), dtype=object)
-             for k in range (64):
+             distancias = np.empty((100,1), dtype=object)
+             for k in range (100):
                  #distancias.append(distance.euclidean(neuro[k, :],distancias))
                  distancias[k, 0] = distance.euclidean(neuro[k, :],jogada[0, :])
              menor = distancias[0,0]
              indice = k
 
-             for i in range (64):
+             for i in range (100):
                  if(distancias[i,0] < menor):
                      menor = distancias[i,0]
                      indice = i
@@ -233,7 +234,13 @@ while not (empate()):
              if(testa_branco(col, player)):
                  pygame.draw.circle(tela, (0, 0, 0), (escolha.x, escolha.y), 48)
                  turn =  not turn                                 
-    
+        
+             else:
+                indice = randrange(100)
+                col = int(classes[indice])
+                if(testa_branco(col, player)):
+                    pygame.draw.circle(tela, (0, 0, 0), (escolha.x, escolha.y), 48)
+                    turn =  not turn                     
         
         if (antes is not turn):
             break
